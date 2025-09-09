@@ -1,2 +1,2 @@
 # EraseUnaVez
-EraseUnaVez: Aplicación para fomentar la lectura en niños pequeños.
+Aplicación para fomentar la lectura en niños pequeños.
