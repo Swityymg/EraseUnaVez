@@ -56,11 +56,11 @@ INSERT INTO progresoLectura (idUsuario, idCuento, ultimaPaginaLeida, completado)
 
 
 INSERT INTO favoritos (idUsuario, idCuento) VALUES
-(1, 1), -- A Leo (1) le gustó el Zorro (1)
-(2, 3), -- A Mía (2) le gustó el Robot (3)
-(3, 1); -- A Hugo (3) le gustó el Zorro (1)
+(1, 1), 
+(2, 3), 
+(3, 1); 
 
 -- Asignamos logros
 INSERT INTO usuarioLogros (idUsuario, idLogro) VALUES
-(1, 1), -- Leo (1) completó un cuento, gana el Logro "Primer Cuento"
-(2, 1); -- Mía (2) también gana el Logro "Primer Cuento"
+(1, 1), 
+(2, 1); 
