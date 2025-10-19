@@ -27,10 +27,10 @@ INSERT INTO cuentos (tituloCuento, descripcion, urlPortada, edadRecomentada) VAL
 
 
 INSERT INTO usuarios (email, contraseña, nombreTutor, nombreInfante, FechaNacimientoInfante, idAvatar) VALUES
-('garcia.ana@mail.com', 'hash_pass123', 'Ana García', 'Leo', '2018-05-10', 1), -- Leo elige el Zorro
-('perez.luis@mail.com', 'hash_pass123', 'Luis Pérez', 'Mía', '2019-01-15', 3), -- Mía elige la Luna
-('martinez.sofia@mail.com', 'hash_pass123', 'Sofía Martínez', 'Hugo', '2017-08-20', 2), -- Hugo elige el Robot
-('lopez.mateo@mail.com', 'hash_pass123', 'Mateo López', 'Valeria', '2020-03-01', 4); -- Valeria elige la Tortuga
+('garcia.ana@mail.com', 'hash_pass123', 'Ana García', 'Leo', '2018-05-10', 1), 
+('perez.luis@mail.com', 'hash_pass123', 'Luis Pérez', 'Mía', '2019-01-15', 3), 
+('martinez.sofia@mail.com', 'hash_pass123', 'Sofía Martínez', 'Hugo', '2017-08-20', 2), 
+('lopez.mateo@mail.com', 'hash_pass123', 'Mateo López', 'Valeria', '2020-03-01', 4); 
 
 
 
@@ -42,17 +42,17 @@ INSERT INTO paginas (idCuento, numeroPagina, texto, urlImagen, urlAudio) VALUES
 
 
 INSERT INTO cuentoCategoria (idCuento, idCategoria) VALUES
-(1, 1), (1, 2), -- Zorro -> Aventura, Animales
-(2, 3),         -- Luna -> Para Dormir
-(3, 1),         -- Robot -> Aventura
-(4, 2),         -- Tortuga -> Animales
-(5, 1);         -- Jardín -> Aventura
+(1, 1), (1, 2), 
+(2, 3),        
+(3, 1),         
+(4, 2),         
+(5, 1);         
 
 
 INSERT INTO progresoLectura (idUsuario, idCuento, ultimaPaginaLeida, completado) VALUES
-(1, 1, 2, TRUE),  -- Leo (Usuario 1) completó el Cuento 1 (Zorro)
-(1, 2, 1, FALSE), -- Leo (Usuario 1) está a la mitad del Cuento 2 (Luna)
-(2, 3, 1, TRUE);  -- Mía (Usuario 2) completó el Cuento 3 (Robot)
+(1, 1, 2, TRUE),  
+(1, 2, 1, FALSE),
+(2, 3, 1, TRUE);  
 
 
 INSERT INTO favoritos (idUsuario, idCuento) VALUES
