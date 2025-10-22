@@ -1,7 +1,7 @@
 -- Base de Datos para aplicación de cuentos infantiles - Érase una vez
 
 
-DROP DATABASE eraseUnaVez;
+DROP DATABASE IF EXISTS eraseUnaVez;
 -- Creación de la base de datos con soporte para emojis y acentos
 CREATE DATABASE IF NOT EXISTS eraseUnaVez CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
