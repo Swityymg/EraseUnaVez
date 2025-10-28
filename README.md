@@ -11,7 +11,7 @@ Tener insatalado
 1. Clonar el repositorio
 2. Instalar dependencias del backend
   Dentro de la carpeta "BACKEND"
-  * npm install
+```npm install ```
 3. Generar el cliente de Prisma
   * npx prisma generate
 4. Configurar las variables de entorno
