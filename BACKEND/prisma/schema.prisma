@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model avatars {
+  idAvatar     Int    @id @default(autoincrement())
+  nombreAvatar String @db.VarChar(100)
+  urlAvatar    String @unique(map: "urlAvatar") @db.VarChar(255)
+}
+
+model categoriascuentos {
+  idCategoria     Int     @id @default(autoincrement())
+  nombreCategoria String  @unique(map: "nombreCategoria") @db.VarChar(50)
+  descripcion     String? @db.Text
+}
+
+model cuentocategoria {
+  idCategoria Int
+  idCuento    Int
+
+  @@id([idCategoria, idCuento])
+  @@index([idCuento], map: "idCuento")
+}
+
+model cuentos {
+  idCuento         Int       @id @default(autoincrement())
+  tituloCuento     String    @db.VarChar(255)
+  descripcion      String?   @db.Text
+  urlPortada       String?   @db.VarChar(255)
+  edadRecomentada  Int?
+  fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model favoritos {
+  idUsuario     Int
+  idCuento      Int
+  fechaAgregado DateTime? @default(now()) @db.Timestamp(0)
+
+  @@id([idUsuario, idCuento])
+  @@index([idCuento], map: "idCuento")
+}
+
+model logros {
+  idLogro     Int     @id @default(autoincrement())
+  nombreLogro String  @db.VarChar(100)
+  descripcion String? @db.Text
+  urlIcono    String? @db.VarChar(255)
+}
+
+model paginas {
+  idPagina     Int     @id @default(autoincrement())
+  idCuento     Int
+  numeroPagina Int
+  texto        String? @db.Text
+  urlImagen    String? @db.VarChar(255)
+  urlAudio     String? @db.VarChar(255)
+
+  @@unique([idCuento, numeroPagina], map: "idCuento")
+}
+
+model progresolectura {
+  idProgreso         Int       @id @default(autoincrement())
+  idUsuario          Int
+  idCuento           Int
+  ultimaPaginaLeida  Int?      @default(0)
+  completado         Boolean   @default(false)
+  fechaActualizacion DateTime? @default(now()) @db.Timestamp(0)
+
+  @@unique([idUsuario, idCuento], map: "idUsuario")
+  @@index([idCuento], map: "idCuento")
+}
+
+model usuariologros {
+  idUsuarioLogo Int       @id @default(autoincrement())
+  idUsuario     Int
+  idLogro       Int
+  fechaObtenido DateTime? @default(now()) @db.Timestamp(0)
+
+  @@unique([idUsuario, idLogro], map: "idUsuario")
+  @@index([idLogro], map: "idLogro")
+}
+
+model usuarios {
+  idUsuario              Int       @id @default(autoincrement())
+  email                  String    @unique(map: "email") @db.VarChar(255)
+  contrase_a             String    @map("contraseña") @db.VarChar(255)
+  nombreTutor            String?   @db.VarChar(100)
+  nombreInfante          String    @db.VarChar(100)
+  FechaNacimientoInfante DateTime? @db.Date
+  idAvatar               Int?
+  fechaRegistro          DateTime? @default(now()) @db.Timestamp(0)
+
+  @@index([idAvatar], map: "idAvatar")
+}
