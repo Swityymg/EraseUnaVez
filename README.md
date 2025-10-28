@@ -7,7 +7,7 @@ Tener insatalado
 * npm
 * MySQL
 
-## Configuración e instalación del Backend 
+## Configuración e instalación 
 1. Clonar el repositorio
 2. Instalar dependencias del backend
   Dentro de la carpeta "BACKEND"
