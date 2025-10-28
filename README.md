@@ -11,11 +11,13 @@ Tener insatalado
 1. Clonar el repositorio
 2. Instalar dependencias del backend
   Dentro de la carpeta "BACKEND"
-```
-npm install
-```
+    ```
+    npm install
+    ```
 4. Generar el cliente de Prisma
-  * npx prisma generate
+    ```
+    npx prisma generate
+    ```
 4. Configurar las variables de entorno
     Crea un archivo llamado `.env` en la raíz de la carpeta `BACKEND` (es decir, en `tu_repositorio/BACKEND/.env`).
     Dentro de este archivo, añade las siguientes líneas con tus credenciales:
