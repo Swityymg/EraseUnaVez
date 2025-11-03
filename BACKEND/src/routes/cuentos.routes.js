@@ -1,12 +1,12 @@
+// src/routes/cuentos.routes.js
 const { Router } = require('express');
-const { getCuentos, getCuentoById } = require('../controllers/cuentos.controller');
-
 const router = Router();
 
-// GET /api/cuentos/
-router.get('/', getCuentos);
+// 1. Importamos las *funciones* (la lógica) desde el controlador
+const { getCuentos, getCuentoPorId } = require('../controllers/cuentos.controller.js');
 
-// GET /api/cuentos/:id
-router.get('/:id', getCuentoById);
+// 2. Definimos las rutas y les asignamos una función controladora
+router.get('/', getCuentos);
+router.get('/:id', getCuentoPorId);
 
 module.exports = router;

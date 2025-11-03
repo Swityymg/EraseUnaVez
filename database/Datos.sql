@@ -27,9 +27,10 @@ INSERT INTO cuentos (tituloCuento, descripcion, urlPortada, edadRecomentada) VAL
 
 
 INSERT INTO usuarios (email, contraseña, nombreTutor, nombreInfante, FechaNacimientoInfante, idAvatar) VALUES
-('garcia.ana@mail.com', 'hash_pass123', 'Ana García', 'Leo', '2018-05-10', 1), 
-('perez.luis@mail.com', 'hash_pass123', 'Luis Pérez', 'Mía', '2019-01-15', 3), 
+('garcia.ana@mail.com', 'pass123', 'Ana García', 'Leo', '2018-05-10', 1), 
+('perez.luis@mail.com', 'hash_pass123', 'Luis Pérez', 'Mía', '2019-01-15', 3),
 ('martinez.sofia@mail.com', 'hash_pass123', 'Sofía Martínez', 'Hugo', '2017-08-20', 2), 
+('llagos@mail.com', 'Camacho22', 'Luis Camacho', 'Freyja', '2020-11-24', 2),
 ('lopez.mateo@mail.com', 'hash_pass123', 'Mateo López', 'Valeria', '2020-03-01', 4); 
 
 

@@ -34,6 +34,10 @@ model cuentos {
   urlPortada       String?   @db.VarChar(255)
   edadRecomentada  Int?
   fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
+
+  // Relación con usuario
+  idUsuario Int?
+  usuario   usuarios? @relation(fields: [idUsuario], references: [idUsuario])
 }
 
 model favoritos {
@@ -94,6 +98,9 @@ model usuarios {
   FechaNacimientoInfante DateTime? @db.Date
   idAvatar               Int?
   fechaRegistro          DateTime? @default(now()) @db.Timestamp(0)
+
+  // Campo inverso de la relación con cuentos
+  cuentos cuentos[]
 
   @@index([idAvatar], map: "idAvatar")
 }
