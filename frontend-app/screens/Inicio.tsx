@@ -9,6 +9,7 @@ import {
   View,
   Dimensions,
   ActivityIndicator, // Para el "spinner" de carga
+  ImageSourcePropType
 } from 'react-native';
 
 // Importamos la función de la API
@@ -26,13 +27,17 @@ type CuentoSimple = {
 // --- COMPONENTE 'BOOKCARD' MEJORADO ---
 // Ahora se llama BookCard y acepta un cuento real
 function BookCard({ cuento }: { cuento: CuentoSimple }) {
+  const defaultCover = require('../assets/ImagenPorDefecto.png')
+
+  const imageUrlSource: ImageSourcePropType = cuento.urlPortada
+    ? { uri: cuento.urlPortada } 
+    : defaultCover; 
+    
   return (
     <View style={styles.bookCard}>
-      {/* Usamos <Image> para mostrar la portada.
-        source={{ uri: ... }} es cómo React Native carga imágenes desde una URL
-      */}
+
       <Image
-        source={{ uri: cuento.urlPortada }}
+        source={ imageUrlSource  }
         style={styles.bookCover}
         resizeMode="cover" // Asegura que la imagen cubra el espacio
       />
