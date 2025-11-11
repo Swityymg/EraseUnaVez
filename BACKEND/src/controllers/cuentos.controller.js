@@ -48,7 +48,6 @@ const getCuentos = async (req, res) => {
  */
 const getCuentoPorId = async (req, res) => {
   const { id } = req.params;
-
   try {
     const cuento = await prisma.cuentos.findUnique({
       where: { idCuento: parseInt(id) },
