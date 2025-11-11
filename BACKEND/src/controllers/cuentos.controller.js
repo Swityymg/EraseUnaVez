@@ -1,13 +1,9 @@
 // src/controllers/cuentos.controller.js
 const prisma = require('../db/prisma');
 
-/**
- * Construye la URL pública completa para un archivo estático.
- * Usa la info de la request para no depender de una IP hardcodeada.
- */
 const construirUrlEstatica = (req, nombreArchivo) => {
   if (!nombreArchivo) return null;
-  // nombreArchivo puede venir como 'img/caperucita.jpg' o solo 'caperucita.jpg'
+  // nombreArchivo puede venir como 'img/caperucita.jpg'
   const nombre = nombreArchivo.replace(/^img\//, '').replace(/^portadas\//, '');
   const host = req.get('host'); // incluye puerto
   const protocol = req.protocol; // http o https
@@ -44,21 +40,25 @@ const getCuentos = async (req, res) => {
 
 /**
  * GET /api/cuentos/:id
- * Devuelve un cuento (con sus páginas) en la misma forma.
+ * Devuelve un cuento por ID.
  */
 const getCuentoPorId = async (req, res) => {
-  const { id } = req.params;
   try {
+    const idNum = Number(req.params.id);
+
+    if (isNaN(idNum)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
     const cuento = await prisma.cuentos.findUnique({
-      where: { idCuento: parseInt(id) },
+      where: { idCuento: idNum },
       include: { paginas: true }
     });
 
     if (!cuento) {
-      return res.status(404).json({ error: 'Cuento no encontrado' });
+      return res.status(404).json({ error: "Cuento no encontrado" });
     }
 
-    // Formatear páginas (si las hay)
     const paginasFormateadas = (cuento.paginas || []).map(p => ({
       idPagina: p.idPagina,
       numeroPagina: p.numeroPagina,
@@ -71,20 +71,137 @@ const getCuentoPorId = async (req, res) => {
       id: cuento.idCuento,
       titulo: cuento.tituloCuento,
       descripcion: cuento.descripcion ?? null,
-      edadRecomentada: cuento.edadRecomentada ?? null,
+      edadRecomendata: cuento.edadRecomendata ?? null,
       fechaPublicacion: cuento.fechaPublicacion ?? null,
       urlPortada: cuento.urlPortada ? construirUrlEstatica(req, cuento.urlPortada) : null,
       paginas: paginasFormateadas,
     };
 
     return res.json(cuentoFormateado);
+
   } catch (error) {
-    console.error('Error getCuentoPorId:', error);
-    return res.status(500).json({ error: 'Error al obtener el cuento' });
+    console.error("Error getCuentoPorId:", error);
+    return res.status(500).json({ error: "Error al obtener el cuento" });
   }
 };
 
+
+/**
+ * POST /api/cuentos
+ * Crea un cuento manualmente
+ */
+const crearCuento = async (req, res) => {
+  try {
+    const { 
+      tituloCuento, 
+      descripcion, 
+      urlPortada, 
+      edadRecomentada,
+      idUsuario
+    } = req.body;
+
+    // Validación
+    if (!tituloCuento) {
+      return res.status(400).json({ error: "El tituloCuento es obligatorio" });
+    }
+
+    const nuevoCuento = await prisma.cuentos.create({
+      data: {
+        tituloCuento,
+        descripcion,
+        urlPortada,
+        edadRecomentada,
+        idUsuario: idUsuario ? Number(idUsuario) : null
+      }
+    });
+
+    return res.json({
+      message: "Cuento creado correctamente",
+      data: nuevoCuento
+    });
+
+  } catch (error) {
+    console.error("Error crearCuento:", error);
+    return res.status(500).json({ error: "Error al crear el cuento" });
+  }
+};
+
+/**
+ * PUT /api/cuentos/:id
+ * Actualiza un cuento
+ */
+const actualizarCuento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const idNum = Number(id);
+
+    if (isNaN(idNum)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    const { 
+      tituloCuento, 
+      descripcion, 
+      urlPortada, 
+      edadRecomentada,
+      idUsuario
+    } = req.body;
+
+    const cuentoActualizado = await prisma.cuentos.update({
+      where: { idCuento: idNum },
+      data: {
+        tituloCuento,
+        descripcion,
+        urlPortada,
+        edadRecomentada,
+        idUsuario
+      }
+    });
+
+    return res.json({
+      message: "Cuento actualizado correctamente",
+      data: cuentoActualizado
+    });
+
+  } catch (error) {
+    console.error("Error actualizarCuento:", error);
+    return res.status(500).json({ error: "Error al actualizar el cuento" });
+  }
+};
+
+
+/**
+ * DELETE /api/cuentos/:id
+ * Elimina un cuento
+ */
+const eliminarCuento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const idNum = Number(id);
+
+    if (isNaN(idNum)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    await prisma.cuentos.delete({
+      where: { idCuento: idNum }
+    });
+
+    return res.json({
+      message: "Cuento eliminado correctamente"
+    });
+
+  } catch (error) {
+    console.error("Error eliminarCuento:", error);
+    return res.status(500).json({ error: "Error al eliminar el cuento" });
+  }
+};
+
+
 module.exports = {
   getCuentos,
-  getCuentoPorId
+  getCuentoPorId,
+  crearCuento,
+  actualizarCuento,
+  eliminarCuento
 };

@@ -35,6 +35,7 @@ model cuentos {
   edadRecomentada  Int?
   fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
   idUsuario        Int?
+  paginas          paginas[]
 
   @@index([idUsuario], map: "fk_cuentos_usuario")
 }
@@ -62,6 +63,8 @@ model paginas {
   texto        String? @db.Text
   urlImagen    String? @db.VarChar(255)
   urlAudio     String? @db.VarChar(255)
+  cuento       cuentos @relation(fields: [idCuento], references: [idCuento])
+
 
   @@unique([idCuento, numeroPagina], map: "idCuento")
 }
