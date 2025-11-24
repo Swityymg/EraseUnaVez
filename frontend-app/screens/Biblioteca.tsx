@@ -89,7 +89,6 @@ export default function Biblioteca({
     cargarCuentosDeAPI(); // Llama a la función
   }, []); // El array vacío [] asegura que se ejecute solo 1 vez
 
-  // --- El resto de tu lógica no cambia ---
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

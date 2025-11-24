@@ -37,6 +37,7 @@ CREATE TABLE `cuentos` (
     `fechaPublicacion` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
     `idUsuario` INTEGER NULL,
 
+    INDEX `fk_cuentos_usuario`(`idUsuario`),
     PRIMARY KEY (`idCuento`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -116,4 +117,4 @@ CREATE TABLE `usuarios` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `cuentos` ADD CONSTRAINT `cuentos_idUsuario_fkey` FOREIGN KEY (`idUsuario`) REFERENCES `usuarios`(`idUsuario`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `paginas` ADD CONSTRAINT `paginas_idCuento_fkey` FOREIGN KEY (`idCuento`) REFERENCES `cuentos`(`idCuento`) ON DELETE RESTRICT ON UPDATE CASCADE;

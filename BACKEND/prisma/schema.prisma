@@ -11,6 +11,46 @@ model avatars {
   idAvatar     Int    @id @default(autoincrement())
   nombreAvatar String @db.VarChar(100)
   urlAvatar    String @unique(map: "urlAvatar") @db.VarChar(255)
+
+  usuarios usuarios[]
+}
+
+model usuarios {
+  idUsuario              Int       @id @default(autoincrement())
+  email                  String    @unique(map: "email") @db.VarChar(255)
+  contrase_a             String    @map("contrase_a") @db.VarChar(255)
+  nombreTutor            String?   @db.VarChar(100)
+  nombreInfante          String    @db.VarChar(100)
+  FechaNacimientoInfante DateTime? @db.Date
+  idAvatar               Int?
+  fechaRegistro          DateTime? @default(now()) @db.Timestamp(0)
+
+  avatar avatars? @relation(fields: [idAvatar], references: [idAvatar])
+
+  progresos progresolectura[]
+  favoritos favoritos[]
+  logrosUsuariologros usuariologros[]
+  cuentos cuentos[]
+
+  @@index([idAvatar], map: "idAvatar")
+}
+
+model cuentos {
+  idCuento         Int       @id @default(autoincrement())
+  tituloCuento     String    @db.VarChar(255)
+  descripcion      String?   @db.Text
+  urlPortada       String?   @db.VarChar(255)
+  edadRecomentada  Int?
+  fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
+  idUsuario        Int?
+
+  autor usuarios? @relation(fields: [idUsuario], references: [idUsuario])
+  paginas paginas[]
+  categorias cuentocategoria[]
+  progresos progresolectura[]
+  favoritos favoritos[]
+
+  @@index([idUsuario], map: "fk_cuentos_usuario")
 }
 
 model categoriascuentos {
@@ -27,18 +67,7 @@ model cuentocategoria {
   @@index([idCuento], map: "idCuento")
 }
 
-model cuentos {
-  idCuento         Int       @id @default(autoincrement())
-  tituloCuento     String    @db.VarChar(255)
-  descripcion      String?   @db.Text
-  urlPortada       String?   @db.VarChar(255)
-  edadRecomentada  Int?
-  fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
-  idUsuario        Int?
-  paginas          paginas[]
 
-  @@index([idUsuario], map: "fk_cuentos_usuario")
-}
 
 model favoritos {
   idUsuario     Int
@@ -63,8 +92,6 @@ model paginas {
   texto        String? @db.Text
   urlImagen    String? @db.VarChar(255)
   urlAudio     String? @db.VarChar(255)
-  cuento       cuentos @relation(fields: [idCuento], references: [idCuento])
-
 
   @@unique([idCuento, numeroPagina], map: "idCuento")
 }
@@ -91,15 +118,4 @@ model usuariologros {
   @@index([idLogro], map: "idLogro")
 }
 
-model usuarios {
-  idUsuario              Int       @id @default(autoincrement())
-  email                  String    @unique(map: "email") @db.VarChar(255)
-  contrase_a             String    @map("contraseña") @db.VarChar(255)
-  nombreTutor            String?   @db.VarChar(100)
-  nombreInfante          String    @db.VarChar(100)
-  FechaNacimientoInfante DateTime? @db.Date
-  idAvatar               Int?
-  fechaRegistro          DateTime? @default(now()) @db.Timestamp(0)
 
-  @@index([idAvatar], map: "idAvatar")
-}

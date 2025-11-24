@@ -11,6 +11,8 @@ import {
   ActivityIndicator, // Para el "spinner" de carga
 } from 'react-native';
 
+
+
 // Importamos la función de la API
 import { obtenerCuentos } from '../src/api';
 
@@ -18,13 +20,12 @@ const { width } = Dimensions.get('window');
 
 // Definimos un tipo simple para los datos que esperamos de la API
 type CuentoSimple = {
-  id: string; // Ya lo convertimos a string en el backend
+  id: string; 
   titulo: string;
-  urlPortada?: string; // Hacemos la url opcional
+  urlPortada?: string; 
 };
 
 // --- COMPONENTE 'BOOKCARD' MEJORADO ---
-// Ahora se llama BookCard y acepta un cuento real
 function BookCard({ cuento }: { cuento: CuentoSimple }) {
   return (
     <View style={styles.bookCard}>
@@ -44,12 +45,13 @@ function BookCard({ cuento }: { cuento: CuentoSimple }) {
 }
 
 export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (route: string) => void; activeRoute?: string }) {
-  // Estados para guardar los cuentos, la carga y el error
+  
+  
   const [cuentos, setCuentos] = useState<CuentoSimple[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect para cargar los datos cuando la pantalla se monta
+  
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -77,9 +79,9 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
     };
 
     cargarDatos();
-  }, []); // El array vacío [] asegura que se ejecute solo 1 vez
+  }, []); 
 
-  // --- FUNCIÓN PARA RENDERIZAR EL CONTENIDO ---
+  
   const renderContenido = () => {
     if (cargando) {
       return (
@@ -110,9 +112,7 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
     // Si todo sale bien, muestra los carruseles
     return (
       <>
-        {/* Por ahora, las 3 secciones muestran la *misma* lista.
-          Más adelante, puedes crear lógica para separarlas.
-        */}
+        {/* Tus cuentos */}
         <Text style={styles.sectionTitleLarge}>Tus Cuentos</Text>
         <ScrollView
           horizontal
@@ -125,6 +125,7 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           ))}
         </ScrollView>
 
+        {/* Anteriores */}
         <Text style={styles.sectionTitle}>Anteriores</Text>
         <ScrollView
           horizontal
@@ -137,6 +138,8 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           ))}
         </ScrollView>
 
+
+        {/* Más Leidos */}
         <Text style={styles.sectionTitle}>Los más leídos</Text>
         <ScrollView
           horizontal
@@ -168,7 +171,7 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
         <View style={{ height: 72 }} />
       </ScrollView>
 
-      {/* --- BARRA DE NAVEGACIÓN INFERIOR (Sin cambios) --- */}
+      {/* --- BARRA DE NAVEGACIÓN INFERIOR --- */}
       <View style={styles.bottomNavWrap}>
         <View style={styles.bottomNav}>
           <TouchableOpacity
@@ -239,13 +242,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: CARD_WIDTH * 1.1,
     borderRadius: 8,
-    backgroundColor: '#E6F8F5', // Color de fondo mientras carga la imagen
+    backgroundColor: '#E6F8F5', 
   },
   bookTitle: { marginTop: 8, fontSize: 13, fontWeight: '600', color: '#222' },
 
   // Estilo para el contenedor de carga/error
   contenedorCentrado: {
-    minHeight: 200, // Le da algo de espacio
+    minHeight: 200, 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -260,7 +263,7 @@ const styles = StyleSheet.create({
   bottomNav: {
     width: width - 36,
     maxWidth: width - 36,
-    height: 56, // altura reducida para compactar espacio vertical
+    height: 56, 
     backgroundColor: '#CFF6F0',
     borderRadius: 20,
     flexDirection: 'row',
