@@ -1,7 +1,7 @@
 
 
 
-const IP_DEL_BACKEND = process.env.REACT_NATIVE_BACKEND_IP || '192.168.68.131';
+const IP_DEL_BACKEND = process.env.REACT_NATIVE_BACKEND_IP || '172.20.3.78';
 const PORT = process.env.REACT_NATIVE_BACKEND_PORT || '3001';
 const BASE_URL = `http://${IP_DEL_BACKEND}:${PORT}/api`;
 
