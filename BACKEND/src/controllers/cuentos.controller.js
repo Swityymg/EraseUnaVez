@@ -86,6 +86,32 @@ const getCuentoPorId = async (req, res) => {
 };
 
 
+const getPaginasCuento = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        
+        const paginas = await prisma.paginas.findMany({
+            where: {
+                idCuento: Number(id) 
+            },
+            orderBy: {
+                numeroPagina: 'asc' 
+            }
+        });
+
+        if (!paginas || paginas.length === 0) {
+            return res.json([]); 
+        }
+
+        res.json(paginas);
+        
+    } catch (error) {
+        console.error("Error Prisma al obtener páginas:", error);
+        // Esto te ayudará a ver en la consola si el nombre de la tabla está mal
+        res.status(500).json({ message: 'Error interno al obtener las páginas' });
+    }
+};
 /**
  * POST /api/cuentos
  * Crea un cuento manualmente
@@ -203,5 +229,6 @@ module.exports = {
   getCuentoPorId,
   crearCuento,
   actualizarCuento,
-  eliminarCuento
+  eliminarCuento,
+  getPaginasCuento
 };
