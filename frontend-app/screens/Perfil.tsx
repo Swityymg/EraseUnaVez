@@ -1,68 +1,90 @@
-// Perfil.tsx - Componente de React Native para la pantalla de perfil.
-// Usa 'View' simple para evitar el error de '<SafeAreaProvider>'.
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import React from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Image, 
-  Dimensions 
-} from 'react-native';
+const screenWidth = Dimensions.get("window").width;
 
-// La importación de SafeAreaView ha sido removida para evitar el error de "No safe area value available".
-// Si puedes, la mejor solución es envolver tu app en <SafeAreaProvider>.
+// --- Tipos ---
 
-const screenWidth = Dimensions.get('window').width;
-
-// --- Tipos para las props ---
-type UserProfile = { 
+type User = {
   id: string;
-  username: string; // @camacho22
-  joinedYear: number; // 2020
-  readTimeMin: number; // 0 min
-  readWeeks: number; // 0
-  readStories: number; // 0
-  isLoggedIn: boolean; // Para decidir qué renderizar
-};
+  name: string;
+  email: string;
+  // Campos opcionales por si en el futuro los pasas desde el backend
+  nombreInfante?: string;
+  fechaRegistro?: string;
+} | null;
 
-type PerfilProps = { 
-  user: UserProfile | null; 
+type PerfilProps = {
+  user: User;
   onSignOut: () => void;
-  onNavigate: (route: string) => void; 
+  onNavigate: (route: string) => void;
 };
 
 // --- Componentes Reutilizables ---
 
-/**
- * Muestra las estadísticas clave del usuario en la tarjeta lila.
- */
-const StatsCard = ({ user }: { user: UserProfile }) => (
-  <View style={styles.statsContainer}>
-    {/* Avatar y Usuario */}
-    <View style={styles.userInfo}>
-      <Image 
-        source={{ uri: 'https://via.placeholder.com/60/FFD700/000000?text=A' }} 
-        style={styles.avatar}
-      />
-      <View>
-        <Text style={styles.username}>@{user.username}</Text>
-        <Text style={styles.joinedText}>Se unió en {user.joinedYear}</Text>
+const StatsCard = ({
+  user,
+  onSignOut,
+}: {
+  user: NonNullable<User>;
+  onSignOut: () => void;
+}) => {
+  // Obtenemos el año actual o el de registro si existiera
+  const joinedYear = user.fechaRegistro
+    ? new Date(user.fechaRegistro).getFullYear()
+    : new Date().getFullYear();
+
+  return (
+    <View style={styles.statsContainer}>
+      {/* Avatar y Usuario */}
+      <View style={styles.userInfo}>
+        <Image
+          // Placeholder con la inicial del usuario
+          source={{
+            uri: `https://ui-avatars.com/api/?name=${user.name}&background=FFD700&color=000&size=128`,
+          }}
+          style={styles.avatar}
+        />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.username}>{user.name}</Text>
+          <Text style={styles.emailText}>{user.email}</Text>
+          <Text style={styles.joinedText}>Se unió en {joinedYear}</Text>
+        </View>
+
+        {/* Botón de Salir pequeño al lado */}
+        <TouchableOpacity onPress={onSignOut} style={styles.logoutIconBtn}>
+          <MaterialCommunityIcons name="logout" size={24} color="#D9534F" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Fila de Estadísticas (Datos simulados por ahora) */}
+      <View style={styles.statsRow}>
+        <StatItem icon="⏳" label="Minutos" value="0" />
+        <StatItem icon="🗓️" label="Semanas" value="0" />
+        <StatItem icon="📓" label="Cuentos" value="0" />
       </View>
     </View>
-    
-    {/* Fila de Estadísticas */}
-    <View style={styles.statsRow}>
-      <StatItem icon="⏳" label="Tiempo de lectura" value={`${user.readTimeMin} min`} />
-      <StatItem icon="🗓️" label="Semanas lectoras" value={user.readWeeks.toString()} />
-      <StatItem icon="📓" label="Cuentos leídos" value={user.readStories.toString()} />
-    </View>
-  </View>
-);
+  );
+};
 
-const StatItem = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
+const StatItem = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+}) => (
   <View style={styles.statItem}>
     <Text style={styles.statIcon}>{icon}</Text>
     <Text style={styles.statLabel}>{label}</Text>
@@ -70,129 +92,144 @@ const StatItem = ({ icon, label, value }: { icon: string; label: string; value: 
   </View>
 );
 
-/**
- * Simulación de una medalla de premio.
- */
-const AwardBadge = ({ awarded = false, focused = false }: { awarded?: boolean, focused?: boolean }) => (
-  <View style={[
-    styles.awardBadge,
-    awarded ? styles.awardBadgeAwarded : styles.awardBadgeLocked,
-    focused && styles.awardBadgeFocused
-  ]}>
-    {/* Placeholder para la medalla */}
-  </View>
-);
-
-/**
- * Barra de navegación inferior (simulación).
- */
-const BottomNavBar = () => (
-  <View style={styles.navBar}>
-    <TouchableOpacity style={styles.navBarItem}>
-      <Text style={styles.navIcon}>🏠</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.navBarItem}>
-      <Text style={styles.navIcon}>🔍</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.navBarItem}>
-      <Text style={styles.navIcon}>📂</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.navBarItem}>
-      <Text style={styles.navIconSelected}>👤</Text> {/* Perfil seleccionado */}
-    </TouchableOpacity>
+const AwardBadge = ({
+  awarded = false,
+  focused = false,
+}: {
+  awarded?: boolean;
+  focused?: boolean;
+}) => (
+  <View
+    style={[
+      styles.awardBadge,
+      awarded ? styles.awardBadgeAwarded : styles.awardBadgeLocked,
+      focused && styles.awardBadgeFocused,
+    ]}
+  >
+    <Text style={{ fontSize: 24 }}>{awarded ? "🏆" : "🔒"}</Text>
   </View>
 );
 
 // --- Componente Principal Perfil ---
 
 export default function Perfil({ user, onSignOut, onNavigate }: PerfilProps) {
-  
-  const safeNavigate = (route: string) => {
-    try {
-      if (onNavigate) {
-        onNavigate(route);
-      } else {
-        console.error(`ERROR: onNavigate no está definido para la ruta: ${route}`);
-      }
-    } catch (e) {
-      console.error("Fallo al ejecutar onNavigate:", e);
-    }
-  };
+  // Barra de navegación interna
+  const BottomNavBar = () => (
+    // Usamos un contenedor 'wrapper' para centrar la barra flotante
+    <View style={styles.navBarWrapper}>
+      <View style={styles.navBar}>
+        <TouchableOpacity
+          style={styles.navBarItem}
+          onPress={() => onNavigate("home")}
+        >
+          <MaterialCommunityIcons
+            name="home-outline"
+            size={28}
+            color="#6b6b6b"
+          />
+        </TouchableOpacity>
 
+        <TouchableOpacity
+          style={styles.navBarItem}
+          onPress={() => onNavigate("catalogo")}
+        >
+          <MaterialCommunityIcons name="magnify" size={28} color="#6b6b6b" />
+        </TouchableOpacity>
 
-  // Manejo de usuario no autenticado (Fallback)
-  if (!user || !user.isLoggedIn) {
+        <TouchableOpacity
+          style={styles.navBarItem}
+          onPress={() => onNavigate("biblioteca")}
+        >
+          <MaterialCommunityIcons
+            name="folder-outline"
+            size={28}
+            color="#6b6b6b"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navBarItem}>
+          {/* Ícono activo: Color verde oscuro (#074B47) */}
+          <MaterialCommunityIcons name="account" size={28} color="#074B47" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  // --- MODO NO AUTENTICADO ---
+  if (!user) {
     return (
       <View style={styles.container}>
-        
-        {/* Botón de Regresar (Back) en la esquina superior izquierda */}
-        <View style={styles.backButtonContainer}>
-          <TouchableOpacity onPress={() => safeNavigate('back')}>
-            <Text style={styles.backIcon}>⬅️</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.fallbackContent}>
+          <MaterialCommunityIcons
+            name="account-circle-outline"
+            size={80}
+            color="#ccc"
+            style={{ marginBottom: 20 }}
+          />
           <Text style={styles.headerTitle}>Perfil</Text>
-          <Text style={styles.fallbackText}>Inicia sesión para ver tu perfil y estadísticas.</Text>
-          
-          {/* Botón de Iniciar Sesión (Tamaño reducido) */}
-          <TouchableOpacity style={styles.smallBtn} onPress={() => safeNavigate('login')}>
-            <Text style={styles.smallBtnText}>Iniciar sesión</Text>
+          <Text style={styles.fallbackText}>
+            Inicia sesión para ver tu progreso y tus cuentos.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.btnPrimary}
+            onPress={() => onNavigate("login")}
+          >
+            <Text style={styles.btnTextPrimary}>Iniciar sesión</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => onNavigate("home")}
+            style={{ marginTop: 20 }}
+          >
+            <Text style={{ color: "#666" }}>Volver al inicio</Text>
           </TouchableOpacity>
         </View>
+        <BottomNavBar />
       </View>
     );
   }
 
-  // Contenido de la pantalla de perfil (Autenticado)
+  // --- MODO AUTENTICADO ---
   return (
     <View style={styles.container}>
-      {/* Header Fijo (con padding superior manual para el área segura) */}
-      <View style={styles.header}> 
+      {/* Header */}
+      <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.bookIcon}>📖</Text>
-          <Text style={styles.headerTitle}>Perfil</Text>
+          <Text style={styles.headerTitle}>Mi Perfil</Text>
         </View>
-        
-        {/* Engrane (Settings/Configuración) */}
-        <TouchableOpacity onPress={() => safeNavigate('settings')}> 
-          <Text style={styles.settingsIcon}>⚙️</Text>
+        {/* Botón de configuración (Visual) */}
+        <TouchableOpacity onPress={() => onNavigate('settings')}>
+          <MaterialCommunityIcons
+            name="cog-outline"
+            size={26}
+            color="#303030"
+          />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Tarjeta de Estadísticas */}
-        <StatsCard user={user} />
+        {/* Pasamos los datos del usuario real */}
+        <StatsCard user={user} onSignOut={onSignOut} />
 
-        {/* Sección de Premios */}
-        <Text style={styles.sectionTitle}>Premios</Text>
+        {/* <Text style={styles.sectionTitle}>Logros y Premios</Text>
         <View style={styles.awardsGrid}>
-          {/* Premios: Usando el parámetro 'awarded' y 'focused' para simular los estados */}
-          
-          {/* Fila 1 */}
           <AwardBadge awarded={true} /> 
+          <AwardBadge awarded={true} />
           <AwardBadge />
-          <AwardBadge />
-          
-          {/* Fila 2 */}
           <AwardBadge />
           <AwardBadge focused={true} /> 
           <AwardBadge />
-          
-          {/* Fila 3 */}
-          <AwardBadge />
-          <AwardBadge />
-          <AwardBadge />
-        </View>
+        </View> */}
 
-        {/* Espacio para la barra de navegación */}
-        <View style={{ height: 60 }} />
+        {/* Botón Grande de Cerrar Sesión (Opcional, por si no ven el icono) */}
+        <TouchableOpacity style={styles.btnLogoutBig} onPress={onSignOut}>
+          <Text style={styles.btnLogoutText}>Cerrar Sesión</Text>
+        </TouchableOpacity>
 
+        <View style={{ height: 80 }} />
       </ScrollView>
 
-      {/* Barra de Navegación Inferior */}
       <BottomNavBar />
     </View>
   );
@@ -201,192 +238,208 @@ export default function Perfil({ user, onSignOut, onNavigate }: PerfilProps) {
 // --- Estilos ---
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FBF6F1' // Fondo general (crema/beige claro)
+  container: {
+    flex: 1,
+    backgroundColor: "#FBF6F1",
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  // --- Header del Perfil Autenticado ---
-  // El paddingTop se aplica manualmente en el componente para simular el área segura.
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    paddingTop: 40, // Asume un valor estándar para la barra de estado
-    backgroundColor: '#FBF6F1',
+    paddingVertical: 15,
+    paddingTop: 50,
+    backgroundColor: "#FBF6F1",
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  bookIcon: {
-    fontSize: 20,
-    marginRight: 5,
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#303030', 
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#7D52F7",
   },
-  settingsIcon: {
-    fontSize: 24,
-    color: '#303030', 
-  },
-  // --- Fallback (No Autenticado) ---
-  // Estructura para el botón de regreso y contenido centrado.
-  backButtonContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 40, // Padding superior para la barra de estado
-    alignSelf: 'flex-start',
-  },
+
+  // Fallback
   fallbackContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
-    marginBottom: 80, // Compensa el espacio del botón de regreso y el padding
   },
   fallbackText: {
     marginTop: 10,
     marginBottom: 30,
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
-  // Botones más pequeños para el fallback 
-  smallBtn: { 
-    backgroundColor: '#EBE0F4', 
-    paddingVertical: 10, 
-    paddingHorizontal: 25,
-    borderRadius: 12, 
-    alignItems: 'center', 
-    marginTop: 20 
+  btnPrimary: {
+    backgroundColor: "#7D52F7",
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    width: "100%",
+    alignItems: "center",
   },
-  smallBtnText: { 
-    color: '#303030', 
-    fontWeight: '700',
+  btnTextPrimary: {
+    color: "#fff",
+    fontWeight: "700",
     fontSize: 16,
   },
-  backIcon: {
-    fontSize: 24,
-    color: '#303030',
-  },
-  // --- Tarjeta de Estadísticas ---
+
+  // Stats Card
   statsContainer: {
-    backgroundColor: '#EBE0F4', 
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 20,
     marginTop: 10,
-    marginBottom: 30,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
-    borderBottomWidth: 1, 
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
     paddingBottom: 15,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     marginRight: 15,
+    backgroundColor: "#eee",
   },
   username: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#303030',
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#303030",
+  },
+  emailText: {
+    fontSize: 14,
+    color: "#888",
+    marginBottom: 4,
   },
   joinedText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: "#074B47",
+    fontWeight: "600",
+  },
+  logoutIconBtn: {
+    padding: 10,
   },
   statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 10,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 5,
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   statIcon: {
-    fontSize: 30, 
+    fontSize: 24,
     marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 5,
+    color: "#999",
+    marginBottom: 2,
   },
   statValue: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#303030',
+    fontWeight: "800",
+    color: "#074B47",
   },
-  // --- Sección de Premios ---
+
+  // Awards
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: "700",
     marginBottom: 15,
-    color: '#303030',
+    color: "#303030",
     marginLeft: 5,
   },
   awardsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
   },
   awardBadge: {
-    width: (screenWidth - 40 - 40) / 3, 
-    height: (screenWidth - 40 - 40) / 3,
+    width: (screenWidth - 40 - 36) / 3,
+    height: (screenWidth - 40 - 36) / 3,
     borderRadius: 15,
     margin: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   awardBadgeLocked: {
-    backgroundColor: '#F7E0E3',
+    backgroundColor: "#EBEBEB",
+    opacity: 0.5,
   },
   awardBadgeAwarded: {
-    backgroundColor: '#FFC83D',
+    backgroundColor: "#FFF4CC", // Dorado claro
+    borderWidth: 1,
+    borderColor: "#FFD700",
   },
   awardBadgeFocused: {
-    borderWidth: 3,
-    borderColor: '#007AFF',
+    borderWidth: 2,
+    borderColor: "#7D52F7",
   },
-  // --- Barra de Navegación Inferior ---
-  navBar: {
-    flexDirection: 'row',
-    height: 60,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+
+  // Logout Button Big
+  btnLogoutBig: {
+    marginTop: 30,
+    backgroundColor: "#FFE5E5",
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  btnLogoutText: {
+    color: "#D9534F",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  navBarWrapper: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 20, // Espacio desde el fondo de la pantalla
     left: 0,
     right: 0,
+    alignItems: 'center', // Centra la barra horizontalmente
+  },
+  // NavBar
+navBar: {
+    flexDirection: 'row',
+    width: '90%', // Ocupa el 90% del ancho
+    height: 60,   // Altura de la cápsula
+    backgroundColor: '#CFF6F0', // COLOR MENTA (Igual a la imagen)
+    borderRadius: 30, // Bordes totalmente redondos
     alignItems: 'center',
+    justifyContent: 'space-around',
+    
+    // Sombra suave para que flote
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // Sombra en Android
   },
   navBarItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-  },
-  navIcon: {
-    fontSize: 24,
-    color: '#A0A0A0', 
-  },
-  navIconSelected: {
-    fontSize: 24,
-    color: '#303030', 
   },
 });

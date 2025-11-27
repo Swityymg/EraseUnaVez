@@ -6,6 +6,7 @@ import Perfil from "./screens/Perfil";
 import Login from "./screens/Login";
 import Splash from "./screens/Splash2";
 import PaginaCuento from "./screens/PaginaCuento";
+import Settings from "./screens/settings";
 
 type Route =
   | "splash"
@@ -14,7 +15,8 @@ type Route =
   | "perfil"
   | "biblioteca"
   | "login"
-  | "paginaCuento";
+  | "paginaCuento"
+  | "settings";
 
 type User = { id: string; name: string; email: string } | null;
 
@@ -79,11 +81,7 @@ export default function App() {
       );
     case "perfil":
       return (
-        <Perfil
-          user={user}
-          onSignOut={signOut}
-          onNavigate={handleNavigate}
-        />
+        <Perfil user={user} onSignOut={signOut} onNavigate={handleNavigate} />
       );
     case "login":
       return (
@@ -93,13 +91,18 @@ export default function App() {
         />
       );
 
-      case "paginaCuento":
+    case "paginaCuento":
       return (
-        <PaginaCuento 
+        <PaginaCuento
           idCuento={selectedId} // Le pasamos el ID guardado
-          onNavigate={handleNavigate} 
+          onNavigate={handleNavigate}
         />
       );
+    case "settings":
+      return (
+        <Settings onNavigate={handleNavigate} 
+          onSignOut={signOut}/>
+      )
 
     default:
       return (

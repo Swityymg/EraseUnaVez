@@ -24,7 +24,7 @@ export default function Login({
   onNavigate,
 }: {
   onSignIn: (email: string) => void;
-  onNavigate?: (r: "signUp" | "home") => void; // Acepta 'signUp' para ir a crear cuenta
+  onNavigate?: (route: string) => void; /* (r: "signUp" | "home") => void; // Acepta 'signUp' para ir a crear cuenta */
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,11 +33,14 @@ export default function Login({
   async function submit() {
     // Para replicar la imagen que pide "Nombre de usuario" en lugar de "Email",
     // asumiremos que el campo `email` se usa para el nombre de usuario o email.
-    if (!email) {
+    const emailLimpio = email.trim();
+    const passLimpio = password.trim();
+
+    if (!emailLimpio) {
       Alert.alert('Error', 'El nombre de usuario o email es obligatorio');
       return;
     }
-    if (!password) {
+    if (!passLimpio) {
       Alert.alert('Error', 'La contraseña es obligatoria');
       return;
     }
@@ -45,17 +48,26 @@ export default function Login({
 
     setCargando(true);
     try {
+      console.log("Intentando login con:", emailLimpio, passLimpio);
       // Usando el email como nombre de usuario para el inicio de sesión simulado
-      const data = await iniciarSesion(email, password); 
+      const data = await iniciarSesion(emailLimpio, passLimpio); 
 
-      onSignIn(data.usuario.email); 
-      
+      console.log("Login exitoso, respuesta:", data);
+
+    if (data && data.usuario && data.usuario.email) {
+         onSignIn(data.usuario.email);
+      } else {
+         throw new Error("La API no devolvió los datos del usuario correctamente.");
+      }
+
     } catch (error: any) {
-      Alert.alert('Error de Login', error.message);
+      console.error("Error en Login:", error);
+      // Muestra el mensaje exacto que viene del backend o de la red
+      Alert.alert('Error de Login', error.message || "No se pudo conectar con el servidor.");
     } finally {
       setCargando(false);
-    }
-  }
+    }}
+ 
 
   return (
     <SafeAreaView style={styles.container}>

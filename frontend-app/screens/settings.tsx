@@ -59,7 +59,7 @@ export default function Settings({ onNavigate, onSignOut }: SettingsProps) {
       
       {/* Header Fijo */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => onNavigate('back')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => onNavigate('perfil')} style={styles.backButton}>
           <Text style={styles.backIcon}>⬅️</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configuración</Text>
