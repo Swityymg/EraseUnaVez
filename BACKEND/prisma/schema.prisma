@@ -10,30 +10,20 @@ datasource db {
 model avatars {
   idAvatar     Int    @id @default(autoincrement())
   nombreAvatar String @db.VarChar(100)
-  urlAvatar    String @unique @db.VarChar(255)
-
-  usuarios usuarios[]
+  urlAvatar    String @unique(map: "urlAvatar") @db.VarChar(255)
 }
 
 model usuarios {
   idUsuario              Int       @id @default(autoincrement())
   email                  String    @unique(map: "email") @db.VarChar(255)
-  contraseña             String    @map("contraseña") @db.VarChar(255)
+  contrasena             String?   @db.VarChar(255)
   nombreTutor            String?   @db.VarChar(100)
   nombreInfante          String    @db.VarChar(100)
   FechaNacimientoInfante DateTime? @db.Date
   idAvatar               Int?
   fechaRegistro          DateTime? @default(now()) @db.Timestamp(0)
 
-  avatar avatars? @relation(fields: [idAvatar], references: [idAvatar])
-
-  progresos progresolectura[]
-  favoritos favoritos[]
-  logrosUsuariologros usuariologros[]
-  cuentos cuentos[]
-
   @@index([idAvatar], map: "idAvatar")
-
 }
 
 model cuentos {
@@ -45,33 +35,21 @@ model cuentos {
   fechaPublicacion DateTime? @default(now()) @db.Timestamp(0)
   idUsuario        Int?
 
-  autor usuarios? @relation(fields: [idUsuario], references: [idUsuario])
-
-  paginas    paginas[]
-  categorias cuentocategoria[]
-  progresos  progresolectura[]
-  favoritos  favoritos[]
-
-  @@index([idUsuario], map: "idx_cuentos_idUsuario")
+  @@index([idUsuario], map: "fk_cuentos_usuario")
 }
 
 model categoriascuentos {
   idCategoria     Int     @id @default(autoincrement())
-  nombreCategoria String  @unique @db.VarChar(50)
+  nombreCategoria String  @unique(map: "nombreCategoria") @db.VarChar(50)
   descripcion     String? @db.Text
-
-  cuentos cuentocategoria[]
 }
 
 model cuentocategoria {
   idCategoria Int
   idCuento    Int
 
-  categoria categoriascuentos @relation(fields: [idCategoria], references: [idCategoria])
-  cuento    cuentos           @relation(fields: [idCuento], references: [idCuento])
-
   @@id([idCategoria, idCuento])
-  @@index([idCuento], map: "idx_catcuento_idCuento")
+  @@index([idCuento], map: "idCuento")
 }
 
 model favoritos {
@@ -79,11 +57,8 @@ model favoritos {
   idCuento      Int
   fechaAgregado DateTime? @default(now()) @db.Timestamp(0)
 
-  usuario usuarios @relation(fields: [idUsuario], references: [idUsuario])
-  cuento  cuentos  @relation(fields: [idCuento], references: [idCuento])
-
   @@id([idUsuario, idCuento])
-  @@index([idCuento], map: "idx_favoritos_idCuento")
+  @@index([idCuento], map: "idCuento")
 }
 
 model logros {
@@ -91,8 +66,6 @@ model logros {
   nombreLogro String  @db.VarChar(100)
   descripcion String? @db.Text
   urlIcono    String? @db.VarChar(255)
-
-  usuarios usuariologros[]
 }
 
 model paginas {
@@ -103,9 +76,7 @@ model paginas {
   urlImagen    String? @db.VarChar(255)
   urlAudio     String? @db.VarChar(255)
 
-  cuento cuentos @relation(fields: [idCuento], references: [idCuento])
-
-  @@unique([idCuento, numeroPagina], map: "unique_pagina_por_cuento")
+  @@unique([idCuento, numeroPagina], map: "idCuento")
 }
 
 model progresolectura {
@@ -116,11 +87,8 @@ model progresolectura {
   completado         Boolean   @default(false)
   fechaActualizacion DateTime? @default(now()) @db.Timestamp(0)
 
-  usuario usuarios @relation(fields: [idUsuario], references: [idUsuario])
-  cuento  cuentos  @relation(fields: [idCuento], references: [idCuento])
-
-  @@unique([idUsuario, idCuento], map: "unique_progreso_usuario_cuento")
-  @@index([idCuento], map: "idx_progreso_idCuento")
+  @@unique([idUsuario, idCuento], map: "idUsuario")
+  @@index([idCuento], map: "idCuento")
 }
 
 model usuariologros {
@@ -129,9 +97,6 @@ model usuariologros {
   idLogro       Int
   fechaObtenido DateTime? @default(now()) @db.Timestamp(0)
 
-  usuario usuarios @relation(fields: [idUsuario], references: [idUsuario])
-  logro   logros   @relation(fields: [idLogro], references: [idLogro])
-
-  @@unique([idUsuario, idLogro], map: "unique_logro_usuario")
-  @@index([idLogro], map: "idx_usuariologros_idLogro")
+  @@unique([idUsuario, idLogro], map: "idUsuario")
+  @@index([idLogro], map: "idLogro")
 }

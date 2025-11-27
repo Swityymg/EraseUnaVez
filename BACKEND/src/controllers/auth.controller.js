@@ -68,11 +68,10 @@ const loginUsuario = async (req, res) => {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    console.log(`[Login Debug] Hash guardado: ${usuario.contraseña}`);
+    console.log(`[Login Debug] Hash guardado: ${usuario.contrasena}`);
 
     // Comparar contraseñas
-    const esContrasenaValida = await bcrypt.compare(contrasena, usuario.contraseña); // ← CORRECTO
-
+    const esContrasenaValida = (contrasena === usuario.contrasena); 
     if (!esContrasenaValida) {
       console.log('[Login] Contraseña incorrecta');
       return res.status(401).json({ error: 'Credenciales inválidas' });
@@ -80,7 +79,7 @@ const loginUsuario = async (req, res) => {
 
     console.log(`[Login] Usuario autenticado: ${email}`);
 
-    const { contraseña, ...usuarioParaCliente } = usuario;
+    const { contrasena: passwordHash, ...usuarioParaCliente } = usuario;
 
     res.status(200).json({
       message: 'Login exitoso',
@@ -88,7 +87,7 @@ const loginUsuario = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("ERROR DETALLADO LOGIN:", error);
     res.status(500).json({ error: 'Error en el login' });
   }
 };
