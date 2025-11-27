@@ -76,13 +76,13 @@ export default function Inicio({
         // Llamamos a la API (que ya trae las URLs de imagen completas)
         const data = await obtenerCuentos();
 
-        // Mapeamos los datos para asegurarnos que coincidan con CuentoSimple
+        
         const cuentosMapeados: CuentoSimple[] = data
-          .filter((c: any) => c.id && c.titulo) // Filtro de seguridad
+          .filter((c: any) => c.id && c.titulo) 
           .map((c: any) => ({
             id: c.id.toString(),
             titulo: c.titulo,
-            urlPortada: c.urlPortada, // Esta ya es la URL completa
+            urlPortada: c.urlPortada, 
           }));
 
         setCuentos(cuentosMapeados);
@@ -96,10 +96,8 @@ export default function Inicio({
     cargarDatos();
   }, []);
 
-  // Función para manejar el clic en la tarjeta del cuento
+  
   const handleCuentoPress = (idCuento: string) => {
-    console.log("2. Inicio recibió el click, enviando a App con ID:", idCuento); // <--- AGREGA ESTO
-    console.log("¿Existe onNavigate?", !!onNavigate); // <--- Verifica si la función existe
     if (onNavigate) {
       onNavigate("paginaCuento", { idCuento });
     }
@@ -132,7 +130,7 @@ export default function Inicio({
       );
     }
 
-    // Si todo sale bien, muestra los carruseles
+    
     return (
       <>
         {/* Tus cuentos */}
@@ -165,7 +163,7 @@ export default function Inicio({
             .reverse()
             .map(
               (
-                cuento // Muestra la lista al revés
+                cuento 
               ) => (
                 <BookCard
                   key={cuento.id}
@@ -210,10 +208,10 @@ export default function Inicio({
           <Text style={styles.headerTitle}>Inicio</Text>
         </View>
 
-        {/* Aquí llamamos a la función de renderizado */}
+        
         {renderContenido()}
 
-        {/* espaciador: evita que el contenido quede oculto por la barra inferior */}
+        
         <View style={{ height: 72 }} />
       </ScrollView>
 
@@ -270,7 +268,7 @@ export default function Inicio({
   );
 }
 
-// ancho fijo de tarjeta para evitar overflow horizontal
+
 const CARD_WIDTH = 120;
 
 const styles = StyleSheet.create({

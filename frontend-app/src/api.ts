@@ -3,7 +3,7 @@
 
 const IP_DEL_BACKEND = process.env.REACT_NATIVE_BACKEND_IP || '192.168.68.109';
 const PORT = process.env.REACT_NATIVE_BACKEND_PORT || '3001';
-const BASE_URL = `http://${IP_DEL_BACKEND}:${PORT}/api`;
+export const BASE_URL = `http://${IP_DEL_BACKEND}:${PORT}/api`;
 
 
 //Tipos de datos
@@ -70,20 +70,17 @@ export const obtenerCuentoPorId = async (id: number) => {
 export const obtenerPaginasCuento = async (idCuento: string | number): Promise<PaginaCuento[]> => {
     try {
         const url = `${BASE_URL}/cuentos/${idCuento}/paginas`;
-        
-        console.log("1. Intentando conectar a URL:", url); 
 
         const response = await fetch(url);
         
-        // Antes de convertir a JSON, leemos el texto crudo para ver si es HTML
         const textResponse = await response.text();
-        console.log("2. Respuesta cruda del servidor:", textResponse); 
+        console.log("📌 RESPUESTA RAW DEL BACKEND:", textResponse);
 
-        // Intentamos convertir ese texto a JSON manualmente
+        
+
         try {
             const data = JSON.parse(textResponse);
             
-            // Si llegamos aquí, es que sí era JSON
             if (Array.isArray(data)) {
                  return data.sort((a: any, b: any) => a.numeroPagina - b.numeroPagina);
             }
