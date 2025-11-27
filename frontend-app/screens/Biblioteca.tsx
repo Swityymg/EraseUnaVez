@@ -10,10 +10,11 @@ import {
   View,
   Dimensions,
   ActivityIndicator, // Importa el "spinner" de carga
+  ImageSourcePropType
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-// 1. Importa la función de tu API
+// Importa la función de tu API
 import { obtenerCuentos } from '../src/api'; 
 
 type Book = {
@@ -22,13 +23,13 @@ type Book = {
   desc: string;
   timeMin: number;
   pages: number;
+  coverUrl?: string;
   createdWithAI?: boolean;
   favorite?: boolean;
   saved?: boolean;
 };
 
-// 2. ELIMINAMOS 'SAMPLE_BOOKS'
-// const SAMPLE_BOOKS: Book[] = [ ... ];
+
 
 export default function Biblioteca({
   onNavigate,
@@ -39,16 +40,14 @@ export default function Biblioteca({
   activeRoute?: string;
   isAuthenticated?: boolean;
 }) {
-  // 3. 'books' inicia como un array vacío
+  
   const [books, setBooks] = useState<Book[]>([]);
   const [tab, setTab] = useState<'todo' | 'guardados' | 'favoritos' | 'creados'>('todo');
   const [query, setQuery] = useState('');
 
-  // 4. Añadimos estados de carga y error
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 5. useEffect: Se ejecuta 1 vez cuando la pantalla carga
   useEffect(() => {
     const cargarCuentosDeAPI = async () => {
       try {
@@ -56,38 +55,37 @@ export default function Biblioteca({
         setCargando(true);
         const data = await obtenerCuentos(); // Llama a la API
 
-        // 6. Validamos que la respuesta sea un array
+       
         if (!Array.isArray(data)) {
           throw new Error('La respuesta de la API no es un array como se esperaba.');
         }
 
-        // 7. FILTRAMOS para evitar el error 'toString of undefined'
-        //    Solo procesamos cuentos que existan (no sean null) y tengan un 'id'
         const dataFiltrada = data.filter(cuento => cuento && cuento.id);
 
-        // 8. Mapeo de Datos: Traduce la respuesta del backend al tipo 'Book'
         const cuentosMapeados: Book[] = dataFiltrada.map((cuento: any) => ({
-          id: cuento.id.toString(), // Convertir ID numérico a string
-          title: cuento.titulo, // Mapear 'titulo' a 'title'
-          desc: cuento.descripcion, // Mapear 'descripcion' a 'desc'
-          // --- Valores por defecto (ya que la API no los provee) ---
-          timeMin: 5, // Puedes ajustar esto
-          pages: 3, // Puedes ajustar esto
-          createdWithAI: false, // En el futuro, esto vendrá de tu API
+          id: cuento.id.toString(),
+          title: cuento.titulo, 
+          desc: cuento.descripcion, 
+
+          coverUrl: cuento.urlPortada,
+         
+          timeMin: 5, 
+          pages: 3, 
+          createdWithAI: false, 
           favorite: false,
           saved: false,
         }));
 
-        setBooks(cuentosMapeados); // Guarda los cuentos reales en el estado
+        setBooks(cuentosMapeados); 
       } catch (err: any) {
-        setError(err.message); // Guarda el mensaje de error
+        setError(err.message); 
       } finally {
-        setCargando(false); // Deja de cargar (sea éxito o error)
+        setCargando(false); 
       }
     };
 
-    cargarCuentosDeAPI(); // Llama a la función
-  }, []); // El array vacío [] asegura que se ejecute solo 1 vez
+    cargarCuentosDeAPI(); 
+  }, []); 
 
 
   const filtered = useMemo(() => {
@@ -126,6 +124,12 @@ export default function Biblioteca({
   }
 
   function renderItem({ item }: { item: Book }) {
+    const defaultCover = require('../assets/ImagenPorDefecto.png');
+
+    const imageSource: ImageSourcePropType = item.coverUrl
+      ? { uri: item.coverUrl }
+      : defaultCover;
+
     return (
       <View style={styles.itemRow}>
         <View style={styles.itemLeft}>
@@ -139,7 +143,11 @@ export default function Biblioteca({
         </View>
 
         <View style={styles.itemRight}>
-          <View style={styles.coverPlaceholder} />
+          <Image 
+            source={imageSource}
+            style={styles.coverImage}
+            resizeMode="cover"
+          />
           <View style={styles.itemActions}>
             <TouchableOpacity onPress={() => toggleSaved(item.id)} style={styles.actionBtn}>
               <MaterialCommunityIcons name={item.saved ? 'bookmark' : 'bookmark-outline'} size={20} color={item.saved ? '#074B47' : '#666'} />
@@ -165,9 +173,7 @@ export default function Biblioteca({
     );
   }
 
-  // 9. Función helper para renderizar el contenido principal
   const renderContenido = () => {
-    // Muestra el indicador de "Cargando..."
     if (cargando) {
       return (
         <View style={styles.contenedorCentrado}>
@@ -177,7 +183,7 @@ export default function Biblioteca({
       );
     }
 
-    // Muestra el error si algo falló
+   
     if (error) {
       return (
         <View style={styles.contenedorCentrado}>
@@ -190,7 +196,7 @@ export default function Biblioteca({
     // Muestra la lista de cuentos (o un mensaje si está vacía)
     return (
       <FlatList
-        data={filtered} // 'filtered' ya usa 'books', así que esto funciona
+        data={filtered} 
         renderItem={renderItem}
         keyExtractor={b => b.id}
         contentContainerStyle={styles.list}
@@ -237,7 +243,7 @@ export default function Biblioteca({
         </TouchableOpacity>
       </View>
 
-      {/* 10. Llama a la función de renderizado condicional */}
+      {/* Llama a la función de renderizado condicional */}
       {renderContenido()}
 
       {/* espaciador: último elemento visible sobre la barra inferior */}
@@ -326,18 +332,25 @@ const styles = StyleSheet.create({
   navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
   navIcon: { fontSize: 22 },
 
-  // --- 11. Estilos para Carga y Error ---
+
   contenedorCentrado: {
-    flex: 1, // Para que ocupe el espacio de la lista
+    flex: 1, 
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    height: 300, // Le damos una altura fija para que no colapse
+    height: 300, 
   },
   textoError: {
     color: 'red',
     fontSize: 16,
     textAlign: 'center',
+  },
+  coverImage: { 
+    width: 64, 
+    height: 92, 
+    borderRadius: 6, 
+    marginBottom: 8,
+    backgroundColor: '#ddd' // Color de fondo mientras carga la imagen
   },
 });
 
