@@ -36,7 +36,7 @@ export default function Biblioteca({
   activeRoute,
   isAuthenticated,
 }: {
-  onNavigate?: (r: string) => void;
+  onNavigate?: (route: string, params?: { idCuento: string }) => void;
   activeRoute?: string;
   isAuthenticated?: boolean;
 }) {
@@ -131,7 +131,11 @@ export default function Biblioteca({
       : defaultCover;
 
     return (
-      <View style={styles.itemRow}>
+      <TouchableOpacity style={styles.itemRow} activeOpacity={0.7}
+        onPress={() => {if (onNavigate) {
+                onNavigate('paginaCuento', { idCuento: item.id });
+            }
+        }}>
         <View style={styles.itemLeft}>
           <Text style={styles.itemTitle}>{item.title}</Text>
           <Text style={styles.itemDesc}>{item.desc}</Text>
@@ -169,7 +173,7 @@ export default function Biblioteca({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 

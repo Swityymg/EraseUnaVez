@@ -13,25 +13,31 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import {
   obtenerPaginasCuento,
-  PaginaCuento as TipoPaginaCuento,
+  PaginaCuento as TipoPaginaCuento, BASE_URL
+  
 } from "../src/api";
+
+import { SERVER_URL } from "../src/api";
 
 // Parámetros que recibe el componente - el idCuento
 type PaginaCuentoProps = {
   idCuento: string;
   onNavigate: (route: string) => void;
+  origen?: string;
 };
 
-const URL = `http://192.168.68.109:3001`;
+
 
 export default function PaginaCuento({
   idCuento,
   onNavigate,
+  origen,
 }: PaginaCuentoProps) {
   const [paginas, setPaginas] = useState<TipoPaginaCuento[]>([]);
   const [paginaActualIndex, setPaginaActualIndex] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     const cargarPaginas = async () => {
@@ -41,6 +47,7 @@ export default function PaginaCuento({
 
         const data = await obtenerPaginasCuento(idCuento);
 
+        // Ordenamos por número de página
         const paginasOrdenadas = data.sort(
           (a, b) => a.numeroPagina - b.numeroPagina
         );
@@ -57,68 +64,75 @@ export default function PaginaCuento({
     cargarPaginas();
   }, [idCuento]);
 
+  useEffect(() => {
+    setImgError(false);
+  }, [paginaActualIndex]);
+
+  //Lógica de navegación
   const paginaActual = paginas[paginaActualIndex];
   const totalPaginas = paginas.length;
   const puedeAvanzar = paginaActualIndex < totalPaginas - 1;
   const puedeRetroceder = paginaActualIndex > 0;
 
-  useEffect(() => {
-    if (paginaActual) {
-      const uriImagenProcesada = obtenerUrlImagen(paginaActual.urlImagen);
-
-      console.log("📌 Ruta desde la BD:", paginaActual.urlImagen);
-      console.log("📌 URL procesada:", uriImagenProcesada);
-      console.log("📌 BASE_URL:", URL);
-    }
-  }, [paginaActual]);
-
   const avanzarPagina = () => {
-    if (puedeAvanzar) {
-      setPaginaActualIndex((prev) => prev + 1);
-    }
+    if (puedeAvanzar) setPaginaActualIndex((prev) => prev + 1);
   };
 
   const retrocederPagina = () => {
-    if (puedeRetroceder) {
-      setPaginaActualIndex((prev) => prev - 1);
-    }
+    if (puedeRetroceder) setPaginaActualIndex((prev) => prev - 1);
   };
 
-  const obtenerUrlImagen = (rutaRelativa: string | null) => {
-    if (!rutaRelativa) return null;
+  const defaultImage = require("../assets/ImagenPorDefecto.png");
 
-    const rutaLimpia = rutaRelativa.replace(/\\/g, "/");
-    if (rutaLimpia.startsWith("http")) {
-      return rutaLimpia;
+  let imageSource: ImageSourcePropType = defaultImage;
+
+  if (paginaActual && paginaActual.urlImagen && !imgError) {
+    let rutaLimpia = paginaActual.urlImagen.replace(/\\/g, "/");
+    
+    if (!rutaLimpia.startsWith("http")) {
+      if (rutaLimpia.startsWith("img/")) {
+        rutaLimpia = rutaLimpia.replace("img/", ""); 
+      }
+      
+      if (rutaLimpia.startsWith("/")) {
+        rutaLimpia = rutaLimpia.substring(1);
+      }
+
+      rutaLimpia = `${SERVER_URL}/static/${rutaLimpia}`;
     }
-    return `${URL}/static/${rutaLimpia}`;
 
-  };
+    console.log("URL Final Generada:", rutaLimpia);
 
-  const uriImagenProcesada = obtenerUrlImagen(paginaActual?.urlImagen);
-
-  const imageUrlSource: ImageSourcePropType = uriImagenProcesada
-    ? { uri: uriImagenProcesada }
-    : require("../assets/ImagenPorDefecto.png");
+    imageSource = { uri: rutaLimpia };
+  }
+  // ---------------------------
 
   if (cargando) {
     return (
       <View style={styles.contenedorCentrado}>
         <ActivityIndicator size="large" color="#074B47" />
-        <Text style={{ marginTop: 10 }}>Cargando páginas...</Text>
+        <Text style={{ marginTop: 10 }}>Cargando cuento...</Text>
       </View>
     );
   }
 
+  const handleVolver = () => {
+    if (origen === 'biblioteca') {
+      onNavigate('biblioteca');
+    } else {
+      onNavigate('home'); // Por defecto va a home
+    }
+  };
+
   if (error || !paginaActual) {
     return (
       <View style={styles.contenedorCentrado}>
-        <Text>{error || "No se encontraron páginas para este cuento."}</Text>
+        <Text>{error || "Este cuento no tiene páginas aún."}</Text>
         <TouchableOpacity
-          onPress={() => onNavigate("home")}
+          onPress={handleVolver}
           style={styles.botonVolver}
         >
-          <Text style={{ color: "#fff" }}>Volver al Inicio</Text>
+          <Text style={{ color: "#fff" }}>{origen === 'biblioteca' ? 'Volver a Biblioteca' : 'Volver al Inicio'}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -128,9 +142,13 @@ export default function PaginaCuento({
     <View style={styles.screen}>
       <View style={styles.container}>
         <Image
-          source={imageUrlSource}
+          source={imageSource}
           style={styles.image}
           resizeMode="cover"
+          onError={(e) => {
+            console.log("Error cargando imagen remota, cambiando a default.");
+            setImgError(true);
+          }}
         />
 
         <View style={styles.textContainer}>
@@ -140,7 +158,7 @@ export default function PaginaCuento({
         <View style={styles.pageNavOverlay}>
           {/* Botón de Cerrar/Volver */}
           <TouchableOpacity
-            onPress={() => onNavigate("home")}
+            onPress={handleVolver}
             style={styles.navButton}
           >
             <MaterialCommunityIcons name="close" size={24} color="#fff" />

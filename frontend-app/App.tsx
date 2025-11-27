@@ -26,6 +26,8 @@ export default function App() {
   // Aquí guardamos el ID del cuento que el usuario quiere leer
   const [selectedId, setSelectedId] = useState<string>("");
 
+  const [selectedOrigin, setSelectedOrigin] = useState<string>("home");
+
   React.useEffect(() => {
     const timer = setTimeout(() => setRoute("home"), 2000); // 2 segundos
     return () => clearTimeout(timer);
