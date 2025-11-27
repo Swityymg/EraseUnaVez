@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'; // Importamos hooks
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState, useEffect } from "react"; // Importamos hooks
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Image,
   ScrollView,
@@ -9,63 +9,73 @@ import {
   View,
   Dimensions,
   ActivityIndicator, // Para el "spinner" de carga
-  ImageSourcePropType
-} from 'react-native';
+  ImageSourcePropType,
+} from "react-native";
+import { obtenerCuentos } from "../src/api"; // Importamos la función de la API
 
-
-
-// Importamos la función de la API
-import { obtenerCuentos } from '../src/api';
-
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // Definimos un tipo simple para los datos que esperamos de la API
 type CuentoSimple = {
-  id: string; 
+  id: string;
   titulo: string;
-  urlPortada?: string; 
+  urlPortada?: string;
 };
 
-// --- COMPONENTE 'BOOKCARD' MEJORADO ---
-function BookCard({ cuento }: { cuento: CuentoSimple }) {
-  const defaultCover = require('../assets/ImagenPorDefecto.png')
+function BookCard({
+  cuento,
+  onSelect,
+}: {
+  cuento: CuentoSimple;
+  onSelect: (id: string) => void;
+}) {
+  const defaultCover = require("../assets/ImagenPorDefecto.png");
 
   const imageUrlSource: ImageSourcePropType = cuento.urlPortada
-    ? { uri: cuento.urlPortada } 
-    : defaultCover; 
-    
-  return (
-    <View style={styles.bookCard}>
+    ? { uri: cuento.urlPortada }
+    : defaultCover;
 
+  return (
+    <TouchableOpacity
+      style={styles.bookCard}
+      activeOpacity={0.7}
+      onPress={() => {
+        console.log("1. Click en tarjeta, ID:", cuento.id);
+        onSelect(cuento.id);
+      }}
+    >
       <Image
-        source={ imageUrlSource  }
+        source={imageUrlSource}
         style={styles.bookCover}
-        resizeMode="cover" // Asegura que la imagen cubra el espacio
+        resizeMode="cover"
       />
       <Text style={styles.bookTitle} numberOfLines={2}>
         {cuento.titulo}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
-export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (route: string) => void; activeRoute?: string }) {
-  
-  
+export default function Inicio({
+  onNavigate,
+  activeRoute,
+}: {
+  onNavigate?: (route: string, params?: { idCuento: string }) => void;
+  activeRoute?: string;
+}) {
   const [cuentos, setCuentos] = useState<CuentoSimple[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         setCargando(true);
         setError(null);
-        
+
         // Llamamos a la API (que ya trae las URLs de imagen completas)
         const data = await obtenerCuentos();
-        
+
         // Mapeamos los datos para asegurarnos que coincidan con CuentoSimple
         const cuentosMapeados: CuentoSimple[] = data
           .filter((c: any) => c.id && c.titulo) // Filtro de seguridad
@@ -74,7 +84,7 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
             titulo: c.titulo,
             urlPortada: c.urlPortada, // Esta ya es la URL completa
           }));
-        
+
         setCuentos(cuentosMapeados);
       } catch (err: any) {
         setError(err.message);
@@ -84,11 +94,19 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
     };
 
     cargarDatos();
-  }, []); 
+  }, []);
 
-  
+  // Función para manejar el clic en la tarjeta del cuento
+  const handleCuentoPress = (idCuento: string) => {
+    console.log("2. Inicio recibió el click, enviando a App con ID:", idCuento); // <--- AGREGA ESTO
+    console.log("¿Existe onNavigate?", !!onNavigate); // <--- Verifica si la función existe
+    if (onNavigate) {
+      onNavigate("paginaCuento", { idCuento });
+    }
+  };
+
   const renderContenido = () => {
-    if (cargando) {
+    if (cargando || error || cuentos.length === 0) {
       return (
         <View style={styles.contenedorCentrado}>
           <ActivityIndicator size="large" color="#074B47" />
@@ -100,15 +118,15 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
     if (error) {
       return (
         <View style={styles.contenedorCentrado}>
-          <Text style={{ color: 'red' }}>Error al cargar:</Text>
-          <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
+          <Text style={{ color: "red" }}>Error al cargar:</Text>
+          <Text style={{ color: "red", textAlign: "center" }}>{error}</Text>
         </View>
       );
     }
 
     if (cuentos.length === 0) {
       return (
-         <View style={styles.contenedorCentrado}>
+        <View style={styles.contenedorCentrado}>
           <Text>No se encontraron cuentos.</Text>
         </View>
       );
@@ -125,8 +143,12 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           style={styles.hScroll}
           contentContainerStyle={styles.hContent}
         >
-          {cuentos.map(cuento => (
-            <BookCard key={cuento.id} cuento={cuento} />
+          {cuentos.map((cuento) => (
+            <BookCard
+              key={cuento.id}
+              cuento={cuento}
+              onSelect={handleCuentoPress}
+            />
           ))}
         </ScrollView>
 
@@ -138,11 +160,21 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           style={styles.hScroll}
           contentContainerStyle={styles.hContent}
         >
-          {cuentos.slice().reverse().map(cuento => ( // Muestra la lista al revés
-            <BookCard key={cuento.id} cuento={cuento} />
-          ))}
+          {cuentos
+            .slice()
+            .reverse()
+            .map(
+              (
+                cuento // Muestra la lista al revés
+              ) => (
+                <BookCard
+                  key={cuento.id}
+                  cuento={cuento}
+                  onSelect={handleCuentoPress}
+                />
+              )
+            )}
         </ScrollView>
-
 
         {/* Más Leidos */}
         <Text style={styles.sectionTitle}>Los más leídos</Text>
@@ -152,20 +184,29 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           style={styles.hScroll}
           contentContainerStyle={styles.hContent}
         >
-          {cuentos.map(cuento => (
-            <BookCard key={cuento.id} cuento={cuento} />
+          {cuentos.map((cuento) => (
+            <BookCard
+              key={cuento.id}
+              cuento={cuento}
+              onSelect={handleCuentoPress}
+            />
           ))}
         </ScrollView>
       </>
     );
   };
 
-
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.wrapper} showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.wrapper}
+        showsHorizontalScrollIndicator={false}
+      >
         <View style={styles.headerRow}>
-          <Image source={require('../assets/logominimal.png')} style={styles.smallLogo} />
+          <Image
+            source={require("../assets/logominimal.png")}
+            style={styles.smallLogo}
+          />
           <Text style={styles.headerTitle}>Inicio</Text>
         </View>
 
@@ -182,45 +223,45 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
           <TouchableOpacity
             style={styles.navItem}
             activeOpacity={0.7}
-            onPress={() => onNavigate && onNavigate('home')}
+            onPress={() => onNavigate && onNavigate("home")}
           >
             <MaterialCommunityIcons
-              name={activeRoute === 'home' ? 'home' : 'home-outline'}
+              name={activeRoute === "home" ? "home" : "home-outline"}
               size={26}
-              color={activeRoute === 'home' ? '#074B47' : '#6b6b6b'}
+              color={activeRoute === "home" ? "#074B47" : "#6b6b6b"}
             />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
             activeOpacity={0.7}
-            onPress={() => onNavigate && onNavigate('catalogo')}
+            onPress={() => onNavigate && onNavigate("catalogo")}
           >
             <MaterialCommunityIcons
-              name={activeRoute === 'catalogo' ? 'magnify' : 'magnify'}
+              name={activeRoute === "catalogo" ? "magnify" : "magnify"}
               size={26}
-              color={activeRoute === 'catalogo' ? '#074B47' : '#6b6b6b'}
+              color={activeRoute === "catalogo" ? "#074B47" : "#6b6b6b"}
             />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
             activeOpacity={0.7}
-            onPress={() => onNavigate && onNavigate('biblioteca')}
+            onPress={() => onNavigate && onNavigate("biblioteca")}
           >
             <MaterialCommunityIcons
-              name={activeRoute === 'biblioteca' ? 'folder' : 'folder-outline'}
+              name={activeRoute === "biblioteca" ? "folder" : "folder-outline"}
               size={26}
-              color={activeRoute === 'biblioteca' ? '#074B47' : '#6b6b6b'}
+              color={activeRoute === "biblioteca" ? "#074B47" : "#6b6b6b"}
             />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
             activeOpacity={0.7}
-            onPress={() => onNavigate && onNavigate('perfil')}
+            onPress={() => onNavigate && onNavigate("perfil")}
           >
             <MaterialCommunityIcons
-              name={activeRoute === 'perfil' ? 'account' : 'account-outline'}
+              name={activeRoute === "perfil" ? "account" : "account-outline"}
               size={26}
-              color={activeRoute === 'perfil' ? '#074B47' : '#6b6b6b'}
+              color={activeRoute === "perfil" ? "#074B47" : "#6b6b6b"}
             />
           </TouchableOpacity>
         </View>
@@ -233,53 +274,73 @@ export default function Inicio({ onNavigate, activeRoute }: { onNavigate?: (rout
 const CARD_WIDTH = 120;
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#FBF6F1', overflow: 'hidden' },
-  wrapper: { paddingTop: 36, paddingHorizontal: 18, paddingBottom: 20, minWidth: '100%' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 18 },
-  smallLogo: { width: 28, height: 28, resizeMode: 'contain', marginRight: 8 },
-  headerTitle: { fontSize: 26, fontWeight: '600', color: '#111' },
-  sectionTitleLarge: { fontSize: 20, fontWeight: '700', marginBottom: 10, marginTop: 6 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10, marginTop: 18 },
+  screen: { flex: 1, backgroundColor: "#FBF6F1", overflow: "hidden" },
+  wrapper: {
+    paddingTop: 36,
+    paddingHorizontal: 18,
+    paddingBottom: 20,
+    minWidth: "100%",
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 18,
+  },
+  smallLogo: { width: 28, height: 28, resizeMode: "contain", marginRight: 8 },
+  headerTitle: { fontSize: 26, fontWeight: "600", color: "#111" },
+  sectionTitleLarge: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 10,
+    marginTop: 6,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 10,
+    marginTop: 18,
+  },
   hScroll: { paddingBottom: 6 },
   hContent: { paddingRight: 18 },
   bookCard: { width: CARD_WIDTH, marginRight: 12 },
   bookCover: {
-    width: '100%',
+    width: "100%",
     height: CARD_WIDTH * 1.1,
     borderRadius: 8,
-    backgroundColor: '#E6F8F5', 
+    backgroundColor: "#E6F8F5",
   },
-  bookTitle: { marginTop: 8, fontSize: 13, fontWeight: '600', color: '#222' },
+  bookTitle: { marginTop: 8, fontSize: 13, fontWeight: "600", color: "#222" },
 
   // Estilo para el contenedor de carga/error
   contenedorCentrado: {
-    minHeight: 200, 
-    justifyContent: 'center',
-    alignItems: 'center',
+    minHeight: 200,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   bottomNavWrap: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   bottomNav: {
     width: width - 36,
     maxWidth: width - 36,
-    height: 56, 
-    backgroundColor: '#CFF6F0',
+    height: 56,
+    backgroundColor: "#CFF6F0",
     borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     paddingHorizontal: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
-  navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+  navItem: { alignItems: "center", justifyContent: "center", flex: 1 },
 });
