@@ -1,3 +1,5 @@
+const path = require('path');
+
 // index.js
 require("dotenv").config(); 
 
